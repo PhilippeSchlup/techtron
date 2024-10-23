@@ -47,10 +47,10 @@
         </div>
         <div class="progress-track">
           <ul id="progressbar">
-            <li class="step0 active " id="step1">Ordered</li>
-            <li class="step0 active text-center" id="step2">Shipped</li>
-            <li class="step0 active text-right" id="step3">On the way</li>
-            <li class="step0 text-right" id="step4">Delivered</li>
+            <li :class="getStatusClass(order.status_id, 1)" id="step1" style="text-align: left;">Ordered</li>
+            <li :class="getStatusClass(order.status_id, 2)" id="step2" class="step0" style="text-align: left;">Shipped</li>
+            <li :class="getStatusClass(order.status_id, 3)" id="step3" class="step0" style="text-align: right;">On the way</li>
+            <li :class="getStatusClass(order.status_id, 4)" id="step4" class="step0" style="text-align: right;">Delivered</li>
           </ul>
         </div>
 
@@ -72,60 +72,57 @@
 </template>
 
 <script>
-import Footer from '@/components/Footer.vue'
-import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue';
+import Header from '@/components/Header.vue';
 
-import { useOrdersStore } from '@/store/orders'
+import { useOrdersStore } from '@/store/orders';
 import { useUserStore } from '@/store/user';
 
 export default {
   setup() {
-    const ordersStore = useOrdersStore()
+    const ordersStore = useOrdersStore();
     const userStore = useUserStore();
-    return { ordersStore, userStore }
+    return { ordersStore, userStore };
   },
   components: {
     Footer,
-    Header
+    Header,
   },
   data() {
     return {
       isHidden: false,
-      id: 0,
       orders: [],
-      
-          //{
-          //"id":"11",
-          //"customer_id":"20",
-          //"created_at":"2021-12-03 18:20:31",
-          //"status_id":"1",
-          //"total":"190",
-          //"order_items":[{"product_id":"2","name":"Salmon Roll","price":"18","quantity":"4"},{"product_id":"3","quantity":"3"},{"product_id":"4","quantity":"2"}]
-          //}
-      
-
       user: {
         id: '',
         name: '',
         email: '',
-        session_id: ''
+        session_id: '',
       },
-    }
+    };
   },
   async mounted() {
-    await this.ordersStore.getMyOrdersDB();
-    this.orders = this.ordersStore.getOrders;
-    this.user = this.userStore.getUser;
-    console.log(this.orders);
+    this.user = this.userStore.getUser; 
+  
+    if (this.user) { 
+      await this.ordersStore.getMyOrdersDB(); // Fetch orders from Supabase
+      this.orders = this.ordersStore.getOrders; // Get the orders from the orders store
+    } else {
+      console.warn('User not logged in; cannot fetch orders.');
+    }
+    console.log(this.orders); 
   },
   methods: {
-
+    getStatusClass(currentStatus, step) {
+      // If the current step is less than or equal to the order's status_id, mark it as active
+      return currentStatus >= step ? 'step0 active' : 'step0';
+    },
   },
   computed: {
-
+   
   },
-}
+};
 </script>
+
 
 <style scoped>
 

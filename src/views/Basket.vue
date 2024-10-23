@@ -1,39 +1,37 @@
 <template>
-	<div>
-
-
-
-		<Header />
-
-
-		<div class="container mt-5 p-3 rounded cart" @click="console.log(basket)" style="height: auto;">
-			<div class="row no-gutters" style="width: 650px; height: auto;">
-				<div class="col-md-8">
-					<div class="product-details mr-2" style="width: 360px;">
-						<h6 class="mb-0">Shopping cart</h6>
-						<hr>
-						<div v-for="basketItem in basket" :key="basketItem.id">
-							<div class="d-flex justify-content-between align-items-center mt-3 p-2 items rounded">
-								<div class="d-flex flex-row"><img class="rounded"
-										:src="'images/' + products.getProduct(basketItem.id).image" width="60"
-										style="object-fit: scale-down;">
-									<div class="ml-2"><span class="font-weight-bold d-block">{{
-										products.getProduct(basketItem.id).name }}</span><span class="spec"></span>
-									</div>
-								</div>
-								<div class="d-flex flex-row align-items-center">
-									<button class="quantity-button" @click="decrementQuantity(basketItem.id)">-</button>
-									<span class="d-block ml-2 font-weight-bold">{{ basketItem.quantity }}</span>
-									<button class="quantity-button" @click="incrementQuantity(basketItem.id)">+</button>
-									<span class="d-block ml-5 font-weight-bold">${{ products.getProduct(basketItem.id).price
-									}}</span>
-									<i class="fa fa-trash-o ml-3 text-black-50" @click="removeItem(basketItem.id)"></i>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-md-4">
+    <div>
+        <Header />
+        <div class="container mt-5 p-3 rounded cart" @click="console.log(basket)" style="height: auto;">
+            <div class="row no-gutters" style="width: 650px; height: auto;">
+                <div class="col-md-8">
+                    <div class="product-details mr-2" style="width: 360px;">
+                        <h6 class="mb-0">Shopping cart</h6>
+                        <hr>
+                        <div v-for="basketItem in basket" :key="basketItem.id">
+                            <div class="d-flex justify-content-between align-items-center mt-3 p-2 items rounded">
+                                <div class="d-flex flex-row">
+                                    <img
+                                        class="rounded"
+                                        :src="'images/' + productsStore.getProduct(basketItem.id)?.image"
+                                        width="60"
+                                        style="object-fit: scale-down;"
+                                    />
+                                    <div class="ml-2">
+                                        <span class="font-weight-bold d-block">{{ productsStore.getProduct(basketItem.id)?.name }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-row align-items-center">
+                                    <button class="quantity-button" @click="decrementQuantity(basketItem.id)">-</button>
+                                    <span class="d-block ml-2 font-weight-bold">{{ basketItem.quantity }}</span>
+                                    <button class="quantity-button" @click="incrementQuantity(basketItem.id, productsStore.getProduct(basketItem.id)?.price)">+</button>
+                                    <span class="d-block ml-5 font-weight-bold">${{ productsStore.getProduct(basketItem.id)?.price }}</span>
+                                    <i class="fa fa-trash-o ml-3 text-black-50" @click="removeItem(basketItem.id)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
 					<div class="payment-info">
 						<div class="d-flex justify-content-between align-items-center"><span>Payment details</span><img
 								class="rounded" src="https://i.imgur.com/WU501C8.jpg" width="30"></div><span
@@ -71,118 +69,131 @@
 						</button>
 					</div>
 				</div>
-			</div>
-		</div>
-
-
-
-
-
-		<Footer />
-
-	</div>
+            </div>
+        </div>
+        <Footer />
+    </div>
 </template>
-
 <script>
-import Footer from '@/components/Footer.vue'
-import Header from '@/components/Header.vue'
-
-import { useBasketStore } from '@/store/basket'
-import { useOrdersStore } from '@/store/orders'
-import { useProductsStore } from '@/store/products'
-import { useUserStore } from '@/store/user'
+import Footer from '@/components/Footer.vue';
+import Header from '@/components/Header.vue';
+import { useBasketStore } from '@/store/basket';
+import { useOrdersStore } from '@/store/orders';
+import { useProductsStore } from '@/store/products';
+import { useUserStore } from '@/store/user';
 
 export default {
-	setup() {
-		const basketStore = useBasketStore()
-		const ordersStore = useOrdersStore()
-		const productsStore = useProductsStore()
-		const userStore = useUserStore()
-		return { basketStore, ordersStore, productsStore, userStore }
-	},
-	components: {
-		Footer,
-		Header
-	},
-	data() {
-		return {
-			basket: [],
-			products: useProductsStore(),
-			user: {
-				id: '',
-				name: '',
-				email: '',
-				session_id: ''
-			},
-			order: {
-				id: '',
-				costumer_id: '',
-				created_at: '',
-				status_id: '',
-				total: '',
-				order_items: '',
-			}
-		}
-	},
-	async mounted() {
-		this.basket = this.basketStore.getProducts;
-		await this.productsStore.getProductsDB();
-		this.user = this.userStore.getUser;
-	},
-	methods: {
-		getImageUrl(name) {
-			return new URL(`../assets/images/${name}`, import.meta.url).href
-		},
-		calculateTotalPrice() {
-			return this.basket.reduce((total, item) => {
-				const product = this.products.getProduct(item.id);
-				const itemPrice = product ? parseFloat(product.price) * item.quantity : 0;
-				return total + itemPrice;
-			}, 0);
-		},
-
-		createOrder() {
-			if (this.user.id === '' || this.user.id === undefined) {
-				alert('Please log in first to make an order.');
+    setup() {
+        const basketStore = useBasketStore();
+        const ordersStore = useOrdersStore();
+        const productsStore = useProductsStore();
+        const userStore = useUserStore();
+        return { basketStore, ordersStore, productsStore, userStore };
+    },
+    components: {
+        Footer,
+        Header,
+    },
+    data() {
+        return {
+            basket: [],
+            user: {
+                id: '',
+                name: '',
+                email: '',
+                session_id: '',
+            },
+        };
+    },
+    async mounted() {
+        this.basket = this.basketStore.getProducts; // Ensure this method exists
+        await this.productsStore.fetchProducts(); // Correctly fetch products from the store
+        this.user = this.userStore.getUser; // Ensure this method exists and is valid
+		//console.log('User after fetching:', this.user);
+    },
+    methods: {
+        calculateTotalPrice() {
+            return this.basket.reduce((total, item) => {
+                const product = this.productsStore.getProduct(item.id); // Use products store
+                const itemPrice = product ? parseFloat(product.price) * item.quantity : 0;
+                return total + itemPrice;
+            }, 0);
+        },
+		async createOrder() {
+			// Ensure user is logged in
+			if (!this.user || !this.user.id) {
+				alert('You need to be logged in to place an order.');
 				return;
 			}
-			const totalAmount = this.calculateTotalPrice();
-			const orderItems = this.basket.map(item => ({
-				id: item.id,
-				quantity: item.quantity,
-			}));
 
-			const orderData = {
-				totalAmount,
-				status_id: 1,
-				items: orderItems,
+			//console.log('Auth User ID:', this.user.id);
+
+			// Fetch the internal user ID (integer) using the Supabase auth user UUID
+			const internalUserId = await this.userStore.fetchInternalUserId(this.user.id);
+			if (!internalUserId) {
+				alert('Failed to fetch internal user ID.');
+				return;
+			}
+
+			// Fetch the status ID (ensure this returns the correct ID type)
+			const statusId = await this.ordersStore.fetchStatusIdByName('Pending');
+			if (!statusId) {
+				alert('Failed to fetch status ID.');
+				return;
+			}
+
+			// Prepare order details
+			const totalPrice = this.calculateTotalPrice();
+			
+			const order = {
+				user_id: internalUserId, // Use the internal user ID (integer)
+				total: totalPrice,
+				status_id: statusId, // Use the fetched status ID
+				created_at: new Date().toISOString(),
 			};
 
-			this.ordersStore.addOrderDB(orderData)
-				.then(() => {
-					this.basketStore.clearBasket();
-					this.$router.push('/message/3');
-				})
-				.catch(error => {
-					console.error('Error creating order:', error);
-				});
+			// Add the order to the database
+			const success = await this.ordersStore.addOrderDB(order);
+			if (success) {
+				// Fetch the order ID from the inserted order
+				const orderId = success; // You need to implement this method
+
+				// Add order items
+				const orderItems = this.basketStore.getItems(); // Fetch items from the basket
+				//console.log(orderItems);
+				for (const item of orderItems) {
+					console.log(item)
+					const itemSuccess = await this.ordersStore.addOrderItemDB(orderId, item);
+					console.log(itemSuccess);
+					if (!itemSuccess) {
+						alert('Error adding item to the order. Please try again.');
+						return; // Stop execution if there's an error adding any item
+					}
+				}
+
+				// Clear the basket after successfully adding order items
+				this.basket = [];
+				alert('Order placed successfully!');
+			} else {
+				alert('Error placing the order. Please try again.');
+			}
 		},
 
-		incrementQuantity(idToDecrement) {
-			this.basketStore.incrementProduct(idToDecrement);
-		},
-		decrementQuantity(idToDecrement) {
-			this.basketStore.decrementProduct(idToDecrement);
-		},
 
-	},
-
-	computed: {
-		totalCartPrice() {
-			return this.calculateTotalPrice();
-		}
-	},
-}
+		incrementQuantity(idToIncrement, price) {
+			console.log(price);
+            this.basketStore.incrementProduct(idToIncrement, price);
+        },
+        decrementQuantity(idToDecrement) {
+            this.basketStore.decrementProduct(idToDecrement);
+        },
+    },
+    computed: {
+        totalCartPrice() {
+            return this.calculateTotalPrice();
+        },
+    },
+};
 </script>
 
 <style scoped>

@@ -1,102 +1,166 @@
 <template>
 	<div class="container center" id="typping">
-		
+	  <!-- The message will display here as it's typed out -->
 	</div>
-</template>
-
-<script>
-
-
-import { useUserStore } from '@/store/user'
-
-
-export default {
-
-	setup() {
-		const userStore = useUserStore()
-		return { userStore }
-	},
-
+  </template>
+  
+  <script>
+  import { supabase } from '@/supabase' // Import Supabase client
+  
+  export default {
 	data() {
-		return {
-			message: '',
-			countdown: 3
-		}
+	  return {
+		message: '',
+		countdown: 3,
+	  }
 	},
+  
 	mounted() {
-		this.setMessage()
-		this.typer()
+	  this.performActionBasedOnId()
 	},
-
-
+  
 	methods: {
-		goToTable() {
-			this.$router.push('/')
-		},
-		setMessage() {
-			if (this.$route.params.id == 1) {
-				this.message = "Success: don't know"
-			}
-			if (this.$route.params.id == 2) {
-				this.message = "Success: Yet to know"
-			}
-			if (this.$route.params.id == 3) {
-				this.message = "Success: Order added to database"
-			}
-			if (this.$route.params.id == 4) {
-				this.message = "Success: You are now registered"
-			}
-			if (this.$route.params.id == 5) {
-				this.message = "Welcome back " + this.userStore.getUser.name + "!"
-			}
-			if (this.$route.params.id == 6) {
-				this.message = `Bye ${this.userStore.user.name}, see you soon! :)`
-			}
-			if (this.$route.params.id == 7) {
-				this.message = "Success: Somethong added to database"
-			}
-
-			/*var timeleft = 2;
-			var downloadTimer = setInterval(() => {
-				if (timeleft <= 0) {
-					clearInterval(downloadTimer)
-					this.$router.push('/')
-				}
-				timeleft -= 1
-			}, 1000)*/
-			var timeleft = 2;
-			var downloadTimer = setInterval(() => {
-				if (timeleft <= 0) {
-					clearInterval(downloadTimer)
-					this.$router.push('/')
-				}
-				timeleft -= 1
-				this.countdown -= 1
-			}, 1000)
-		},
-
-		typer: function () {
-			var i = 0;
-			var speed = 55;
-			var message = this.message;
-
-			// Define typer function inside the scope
-			function typeWriter() {
-				if (i < message.length) {
-					document.getElementById("typping").innerHTML += message.charAt(i);
-					i++;
-					setTimeout(typeWriter, speed);
-				}
-			}
-
-			// Call the typer function
-			typeWriter();
+	  goToTable() {
+		this.$router.push('/')
+	  },
+  
+	  async performActionBasedOnId() {
+		const actionId = this.$route.params.id;
+  
+		switch (actionId) {
+		  case '1':
+			await this.someSupabaseOperation(); // Example operation
+			this.message = "Success: don't know";
+			break;
+		  case '2':
+			await this.anotherSupabaseOperation(); // Another example operation
+			this.message = "Success: Yet to know";
+			break;
+		  case '3':
+			await this.addOrderToDatabase(); // Add order
+			break;
+		  case '4':
+			await this.registerUser(); // Register user
+			break;
+		  case '5':
+			this.message = "Welcome back!"; // Static welcome message
+			break;
+		  case '6':
+			this.message = "Bye, see you soon! :)"; // Static goodbye message
+			break;
+		  case '7':
+			await this.addSomethingToDatabase(); // Another operation
+			this.message = "Success: Something added to database";
+			break;
+		  default:
+			this.message = "Unknown action";
 		}
-
+  
+		this.typer(); // Start typing effect
+		this.startCountdown(); // Start countdown
+	  },
+  
+	  async someSupabaseOperation() {
+		// Replace this with an actual Supabase operation
+		const { data, error } = await supabase
+		  .from('your_table')
+		  .insert([{ your_column: 'value' }]); // Example insert operation
+  
+		if (error) {
+		  console.error('Error:', error);
+		  this.message = 'Operation failed: ' + error.message;
+		} else {
+		  this.message = 'Operation succeeded!';
+		}
+	  },
+  
+	  async anotherSupabaseOperation() {
+		// Another operation, like fetching data
+		const { data, error } = await supabase
+		  .from('another_table')
+		  .select('*');
+  
+		if (error) {
+		  console.error('Error:', error);
+		  this.message = 'Failed to fetch data: ' + error.message;
+		} else {
+		  this.message = 'Data fetched successfully!';
+		}
+	  },
+  
+	  async addOrderToDatabase() {
+		// Replace with actual order adding logic
+		const { data, error } = await supabase
+		  .from('orders')
+		  .insert([{ item: 'New Order', quantity: 1 }]);
+  
+		if (error) {
+		  console.error('Error:', error);
+		  this.message = 'Failed to add order: ' + error.message;
+		} else {
+		  this.message = 'Order added to database!';
+		}
+	  },
+  
+	  async registerUser() {
+		// Example user registration logic
+		const { user, error } = await supabase.auth.signUp({
+		  email: 'user@example.com', // Replace with actual email
+		  password: 'password', // Replace with actual password
+		});
+  
+		if (error) {
+		  console.error('Registration error:', error);
+		  this.message = 'Registration failed: ' + error.message;
+		} else {
+		  this.message = 'User registered successfully!';
+		}
+	  },
+  
+	  async addSomethingToDatabase() {
+		// Replace with actual logic
+		const { data, error } = await supabase
+		  .from('your_table')
+		  .insert([{ your_column: 'value' }]);
+  
+		if (error) {
+		  console.error('Error:', error);
+		  this.message = 'Failed to add: ' + error.message;
+		} else {
+		  this.message = 'Added successfully!';
+		}
+	  },
+  
+	  startCountdown() {
+		this.countdown = 3; // Set initial countdown value
+		const timer = setInterval(() => {
+		  this.countdown--;
+		  if (this.countdown <= 0) {
+			clearInterval(timer);
+			this.goToTable(); // Redirect after countdown
+		  }
+		}, 1000);
+	  },
+  
+	  typer() {
+		const element = document.getElementById("typping");
+		let i = 0;
+		const speed = 55; // Speed of typing effect
+  
+		const typeWriter = () => {
+		  if (i < this.message.length) {
+			element.innerHTML += this.message.charAt(i);
+			i++;
+			setTimeout(typeWriter, speed);
+		  }
+		};
+  
+		typeWriter(); // Start typing effect
+	  },
 	},
-
-}
-</script>
+  }
+  </script>
+  
 
 <style scoped>
 .logout {

@@ -58,36 +58,8 @@ export default {
 		};
 	},
 	mounted() {
-		//this.typer();
 	},
 	methods: {
-		/*typer: function () {
-			var i = 0;
-			var speed = 55;
-			var message = "Welcome to TechTron!\nWe hope you buy a lot! :)";
-
-			// Define typer function inside the scope
-			function typeWriter() {
-				if (i < message.length) {
-					document.getElementById("typping").innerHTML += message.charAt(i);
-					i++;
-					setTimeout(typeWriter, speed);
-				}
-			}
-
-			// Call the typer function
-			typeWriter();
-
-			var timeleft = 4; // Set the time in seconds
-			var downloadTimer = setInterval(() => {
-				if (timeleft <= 0) {
-					clearInterval(downloadTimer); // Stop the timer
-					document.getElementById("typping").innerHTML = ""; // Clear the content
-					this.isMessageTime = false;
-				}
-				timeleft -= 1;
-			}, 1000);
-		},*/
 	},
 	computed: {},
 };

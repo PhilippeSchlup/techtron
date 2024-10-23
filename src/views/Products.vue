@@ -14,9 +14,9 @@
                     Category
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    <li v-for="categorie in categories.categories" :key="categorie.id">
+                    <li v-for="categorie in categories" :key="categorie.id">
                         <label class="dropdown-item">
-                            <input type="checkbox" class="mx-2" v-model="selectedCategories" :value="categorie.name" />
+                            <input type="checkbox" class="mx-2" v-model="selectedCategories" :value="categorie.id" />
                             {{ categorie.name }}
                         </label>
                     </li>
@@ -39,7 +39,7 @@
                                 <p style="font-weight: 700; ">
                                     €{{ product.price }} <button type="submit" name="go"
                                         style="color: rgb(255, 255, 255); background-color: black;"
-                                        @click="basketStore.incrementProduct(product.id)">
+                                        @click="basketStore.incrementProduct(product.id, product.price)">
                                         <span></span>
                                         <span></span>
                                         <span></span>
@@ -60,80 +60,75 @@
 </template>
   
 <script>
-import Footer from '@/components/Footer.vue'
-import Header from '@/components/Header.vue'
+import Footer from '@/components/Footer.vue';
+import Header from '@/components/Header.vue';
 
-import { useBasketStore } from '@/store/basket'
-import { useProductsStore } from '@/store/products'
-import { useCategoriesStore } from '@/store/categories'
-import { useUserStore } from '@/store/user'
+import { useBasketStore } from '@/store/basket';
+import { useProductsStore } from '@/store/products';
+import { useCategoriesStore } from '@/store/categories';
+import { useUserStore } from '@/store/user';
 
 export default {
     setup() {
-        const basketStore = useBasketStore()
-        const productsStore = useProductsStore()
-        const categoriesStore = useCategoriesStore()
-        const userStore = useUserStore()
-        return { basketStore, productsStore, categoriesStore, userStore }
+        const basketStore = useBasketStore();
+        const productsStore = useProductsStore();
+        const categoriesStore = useCategoriesStore();
+        const userStore = useUserStore();
+
+        return { basketStore, productsStore, categoriesStore, userStore };
     },
     components: {
         Footer,
-        Header
+        Header,
     },
     data() {
         return {
             basket: [],
-            products: useProductsStore(),
-            categories: useCategoriesStore(),
             user: {
                 id: '',
                 name: '',
                 email: '',
-                session_id: ''
+                session_id: '',
             },
-            show: "", // You can initialize it with an empty string or any default value
             selectedCategories: [], // Array to store the selected category IDs
-        }
+        };
     },
     watch: {
         selectedCategories: {
             handler(newValues) {
-                // Update 'show' with the last selected category name
-                this.show = newValues[newValues.length - 1] || "";
-                console.log(this.selectedCategories)
+                console.log('Selected Categories:', newValues);
             },
             deep: true,
         },
     },
-    mounted() {
-        this.basket = this.basketStore.getProducts;
-        this.productsStore.getProductsDB();
-        this.categoriesStore.getCategoriesDB();
-        this.user = this.userStore.getUser;
+    async mounted() {
+        this.basket = this.basketStore.getProducts; // Get products from the basket store
+        await this.productsStore.fetchProducts(); // Call the correct method to fetch products
+        await this.categoriesStore.getCategoriesDB(); // Fetch categories from Supabase
+        this.user = this.userStore.getUser; // Get user data from the user store
+        console.log('Products:', this.productsStore.getProducts); // Debugging line
     },
     methods: {
-        /*getProductImage(imageName) {
-            // Assuming images are in the 'src/assets/images/' directory
-            const imagePath = require(`@/assets/images/${imageName}`);
-            return imagePath.default || imagePath;
-        },*/
         getImageUrl(name) {
-            return new URL(`../assets/images/${name}`, import.meta.url).href
-        }
-    },
-    computed: {
-        filteredProducts() {
-            if (!this.show) {
-                return this.products.products;
-            }
-
-            return this.products.products.filter(
-                (product) => this.selectedCategories.includes(product.cat_id)
-            );
+            return new URL(`../assets/images/${name}`, import.meta.url).href;
         },
     },
-}
+    computed: {
+        categories() {
+            return this.categoriesStore.getCategories; // Access the getter directly
+        },
+        filteredProducts() {
+            const allProducts = this.productsStore.getProducts;
+            if (!this.selectedCategories.length) {
+                return allProducts; // Return all products if no category is selected
+            }
+
+            return allProducts.filter(product => this.selectedCategories.includes(product.cat_id));
+        },
+    },
+};
 </script>
+
   
 <style scoped>
 .products-grid {

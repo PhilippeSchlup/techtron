@@ -1,60 +1,50 @@
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useBasketStore = defineStore({
   id: 'basket',
   state: () => ({
-    products: [
-      // {
-      //   id: 1,
-      //   quantity: 5
-      // },
-      // {
-      //   id: 2,        
-      //   quantity: 2
-      // },
-      // {
-      //   id: 3,        
-      //   quantity: 3
-      // }
-    ]
+    products: [] // Array to hold products in the basket
   }),
   getters: {
     getProducts(state) {
       return state.products;
     },
+    totalBasketItems(state) {
+      return state.products.reduce((total, item) => total + item.quantity, 0); // Calculate total items in basket
+    },
+    totalBasketPrice(state) {
+      return state.products.reduce((total, item) => total + (item.price * item.quantity), 0); // Calculate total price
+    }
   },
   actions: {
     clearBasket() {
-      this.products = [];
+      this.products = []; // Clear the basket
     },
-    incrementProduct(idToIncrement) {
-      // Check if item exists in basket
+    incrementProduct(idToIncrement, price) {
+      console.log(price);
       const existingItem = this.products.find(item => item.id === idToIncrement);
-
-      // Item exists; increment quantity
+      
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += 1; // If item already exists, just increment quantity
       } else {
-        // Item does not exist; create item
         this.products.push({
           id: idToIncrement,
-          quantity: 1
+          price: price, // Add price to product details
+          quantity: 1 // Set initial quantity to 1
         });
       }
     },
     decrementProduct(idToDecrement) {
-      // Find the index of the item in the basket
       const index = this.products.findIndex(item => item.id === idToDecrement);
-
-      // Remove item if it exists and quantity is greater than 0
       if (index !== -1 && this.products[index].quantity > 0) {
-        this.products[index].quantity -= 1;
-
-        // Remove the item from the basket if quantity becomes 0
+        this.products[index].quantity -= 1; // Decrease the quantity
         if (this.products[index].quantity === 0) {
-          this.products.splice(index, 1);
+          this.products.splice(index, 1); // Remove product from basket if quantity is zero
         }
       }
+    },
+    getItems() {
+      return this.products; // Return the current products in the basket
     }
   }
 });

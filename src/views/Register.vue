@@ -51,109 +51,84 @@
 
 	</div>
 </template>
-<script>
-import Footer from '@/components/Footer.vue'
-import Header from '@/components/Header.vue'
 
-import { useUserStore } from '@/store/user'
+<script>
+import Footer from '@/components/Footer.vue';
+import Header from '@/components/Header.vue';
+import { useUserStore } from '@/store/user'; // Import the user store
 
 export default {
+  components: {
+    Footer,
+    Header,
+  },
+  setup() {
+    const userStore = useUserStore(); // Access the user store
+    return { userStore };
+  },
+  data() {
+    return {
+      user: {
+        name: '',
+        email: '',
+        password: '',
+      },
+      passwordConfirmation: '',
+      submitting: false,
+      error: '',
+    };
+  },
+  methods: {
+    async handleSubmit() {
+      this.submitting = true;
+      this.error = ''; // Reset any previous error
 
-	setup() {
-		const userStore = useUserStore()
-		return { userStore }
-	},
+      // Validate inputs
+      const nameError = this.invalidName();
+      const emailError = this.invalidEmail();
+      const passwordError = this.invalidPassword();
+      const passwordConfirmationError = this.invalidPasswordConfirmation();
 
-	components: {
-		Footer,
-		Header
-	},
-	data() {
-		return {
-			user: {
-				name: '',
-				email: '',
-				password: '',
-			},
-			passwordConfirmation: '',
-			submitting: false,
-			error: '',
-		}
-	},
+      // Concatenate error messages
+      this.error = nameError + emailError + passwordError + passwordConfirmationError;
 
-	mounted() {
-		this.user = this.userStore.getUser;
-	},
+      // Check if there are any errors
+      if (this.error !== '') {
+        this.submitting = false;
+        return;
+      }
 
-	methods: {
-		handleSubmit: function () {
-			this.submitting = true;
+      // Use the updated signUp method from the store, passing the name as well
+      const success = await this.userStore.signUp(this.user.email, this.user.password, this.user.name); // Use the userStore from setup
 
-			// Call validation functions and store error messages
-			const nameError = this.invalidName();
-			const emailError = this.invalidEmail();
-			const passwordError = this.invalidPassword();
-			const passwordConfirmationError = this.invalidPasswordConfirmation();
+      if (!success) {
+        this.submitting = false; // Stop submitting if there's an error
+        return;
+      }
 
-			// Concatenate error messages
-			this.error = nameError + emailError + passwordError + passwordConfirmationError;
+      // Redirect or show a success message if signup is successful
+      this.$router.push("/message/4");
+      this.submitting = false; // Reset submitting state
+    },
 
-			// Check if there are any errors
-			if (this.error !== '') {
-				return;
-			}
-
-			this.userStore.userExistsDB(this.user).then(
-				result => {
-					if (result) {
-						alert("This email already exists in the DB!");
-					} else {
-						this.userStore.addUserDB();
-						this.$router.push("/message/4");
-					}
-				}
-			);
-		},
-
-		cancel() {
-			this.$router.push('/')
-		},
-		invalidName: function () {
-			if (this.user.name === '') return 'Invalid name!'
-			else return ''
-		},
-
-		invalidPassword: function () {
-			if (this.user.password === '' || this.user.password.length < 8) return 'Password too short, it has to be at least 8 characters!'
-			else return ''
-		},
-
-		invalidPasswordConfirmation: function () {
-			if (this.user.password !== this.passwordConfirmation) return 'Password do not match!'
-			else return ''
-		},
-
-		invalidEmail: function () {
-			const regExpr = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
-			if (!this.user.email.match(regExpr)) return 'Invalid email!'
-			else return ''
-		},
-	},
-
-	computed: {
-
-	},
-
-	directives: {
-
-	},
-
-	created: function () {
-
-
-	}
+    invalidName() {
+      return this.user.name === '' ? 'Invalid name!\n' : ''; // Added newline for better readability
+    },
+    invalidPassword() {
+      return this.user.password === '' || this.user.password.length < 8 ? 'Password too short, it has to be at least 8 characters!\n' : ''; // Added newline
+    },
+    invalidPasswordConfirmation() {
+      return this.user.password !== this.passwordConfirmation ? 'Passwords do not match!\n' : ''; // Corrected error message
+    },
+    invalidEmail() {
+      const regExpr = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+      return !this.user.email.match(regExpr) ? 'Invalid email!\n' : ''; // Added newline
+    },
+  },
 }
 </script>
+
+
 <style scoped>
 .nice {
 	margin: 0;
