@@ -1,11 +1,10 @@
 import { fileURLToPath, URL } from 'node:url'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/~a73820/LAB11/dist/',
+  base: '/techtron/', // Update this to your repo name
   server: {
     port: 8080
   },
